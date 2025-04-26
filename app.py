@@ -8,17 +8,12 @@ Created on Sat Apr 26 21:50:21 2025
 import streamlit as st
 import pickle
 import numpy as np
-from sklearn.preprocessing import LabelEncoder
+import pandas as pd
 
-# Load saved model
+# Load saved model and encoders
 model = pickle.load(open('loan_approval_model.pkl', 'rb'))
-
-# Recreate and load encoders
-status_encoder = LabelEncoder()
-status_encoder.classes_ = np.array(['employed', 'unemployed'])  # Adjust according to your training
-
-approval_encoder = LabelEncoder()
-approval_encoder.classes_ = np.array(['No', 'Yes'])  # Adjust according to your training
+status_encoder = pickle.load(open('employment_status_encoder.pkl', 'rb'))
+approval_encoder = pickle.load(open('approval_encoder.pkl', 'rb'))
 
 # Streamlit UI
 st.title("🏦 Loan Approval Prediction App")
@@ -36,7 +31,14 @@ employment_status = st.selectbox('Employment Status', ['employed', 'unemployed']
 if st.button('Predict Approval'):
     # Prepare the input
     status_encoded = status_encoder.transform([employment_status])[0]
-    input_data = np.array([[income, credit_score, loan_amount, dti_ratio, status_encoded]])
+    
+    input_data = pd.DataFrame({
+        'Income': [income],
+        'Credit_Score': [credit_score],
+        'Loan_Amount': [loan_amount],
+        'DTI_Ratio': [dti_ratio],
+        'Employment_Status': [status_encoded]
+    })
     
     # Make prediction
     prediction = model.predict(input_data)
@@ -45,6 +47,8 @@ if st.button('Predict Approval'):
     # Show result nicely
     if prediction_label == 'Yes':
         st.success("🎉 Loan Approved!")
+        st.balloons()
     else:
         st.error("❌ Loan Rejected!")
+
 
