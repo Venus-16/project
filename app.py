@@ -15,10 +15,10 @@ model = pickle.load(open('loan_approval_model.pkl', 'rb'))
 
 # Recreate and load encoders
 status_encoder = LabelEncoder()
-status_encoder.classes_ = np.array(['employed', 'unemployed'])  # Adjust according to your data
+status_encoder.classes_ = np.array(['employed', 'unemployed'])  # Adjust according to your training
 
 approval_encoder = LabelEncoder()
-approval_encoder.classes_ = np.array(['No', 'Yes'])  # Adjust according to your data
+approval_encoder.classes_ = np.array(['No', 'Yes'])  # Adjust according to your training
 
 # Streamlit UI
 st.title("🏦 Loan Approval Prediction App")
@@ -42,5 +42,9 @@ if st.button('Predict Approval'):
     prediction = model.predict(input_data)
     prediction_label = approval_encoder.inverse_transform(prediction)[0]
     
-    st.subheader(f"Prediction: **{prediction_label}**")
+    # Show result nicely
+    if prediction_label == 'Yes':
+        st.success("🎉 Loan Approved!")
+    else:
+        st.error("❌ Loan Rejected!")
 
